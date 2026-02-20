@@ -110,11 +110,11 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
 
-    // Serve injected JS from Worker itself
-    if (url.pathname === "/cf-inject.js")
+    // Serve injected JS
+    if (url.pathname === "/cf-inject.js") {
       return new Response(INJECT_SCRIPT, INJECT_HEADERS);
+    }
 
-    // Normal page request
     const response = await fetch(request);
 
     const contentType = response.headers.get("content-type") || "";
@@ -122,7 +122,23 @@ export default {
       return response;
     }
 
-    return new HTMLRewriter()
+    // 👇 Clone headers
+    const newHeaders = new Headers(response.headers);
+
+    // 👇 Override CSP to allow iframe domain
+    newHeaders.set(
+      "Content-Security-Policy",
+      `
+      script-src 'self' 'unsafe-eval';
+      frame-src 'self' https://biggifts-staging.vercel.app;
+      child-src 'self' https://biggifts-staging.vercel.app;
+      object-src 'none';
+      base-uri 'self';
+      `,
+    );
+
+    // 👇 Inject script
+    const modified = new HTMLRewriter()
       .on("body", {
         element(el) {
           el.append(`<script src="/cf-inject.js" defer></script>`, {
@@ -131,5 +147,10 @@ export default {
         },
       })
       .transform(response);
+
+    return new Response(modified.body, {
+      status: response.status,
+      headers: newHeaders,
+    });
   },
 };
