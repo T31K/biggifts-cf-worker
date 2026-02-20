@@ -112,9 +112,14 @@ export default {
 
     // Serve injected JS
     if (url.pathname === "/cf-inject.js") {
-      return new Response(INJECT_SCRIPT, INJECT_HEADERS);
+      return new Response(INJECT_SCRIPT, {
+        headers: {
+          "content-type": "application/javascript",
+        },
+      });
     }
 
+    // Fetch original response
     const response = await fetch(request);
 
     const contentType = response.headers.get("content-type") || "";
@@ -122,23 +127,17 @@ export default {
       return response;
     }
 
-    // 👇 Clone headers
+    // Clone headers
     const newHeaders = new Headers(response.headers);
 
-    // 👇 Override CSP to allow iframe domain
+    // Override CSP to allow iframe domain
     newHeaders.set(
       "Content-Security-Policy",
-      `
-      script-src 'self' 'unsafe-eval';
-      frame-src 'self' https://biggifts-staging.vercel.app;
-      child-src 'self' https://biggifts-staging.vercel.app;
-      object-src 'none';
-      base-uri 'self';
-      `,
+      "script-src 'self' 'unsafe-eval'; frame-src 'self' https://biggifts-staging.vercel.app; child-src 'self' https://biggifts-staging.vercel.app; object-src 'none'; base-uri 'self';",
     );
 
-    // 👇 Inject script
-    const modified = new HTMLRewriter()
+    // Inject script tag
+    const modifiedResponse = new HTMLRewriter()
       .on("body", {
         element(el) {
           el.append(`<script src="/cf-inject.js" defer></script>`, {
@@ -148,8 +147,8 @@ export default {
       })
       .transform(response);
 
-    return new Response(modified.body, {
-      status: response.status,
+    return new Response(modifiedResponse.body, {
+      status: modifiedResponse.status,
       headers: newHeaders,
     });
   },
