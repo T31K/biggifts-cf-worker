@@ -120,8 +120,13 @@ const INJECT_SCRIPT = `
     });
   }
 
+  let lastCategoryPath = null;
+
   const categoryObserver = new MutationObserver(() => {
     const path = window.location.pathname;
+    if (path === lastCategoryPath) return;
+    lastCategoryPath = path;
+
     if (path.length > "/admin/content/products".length && path.startsWith("/admin/content/products")) {
       console.log("On product detail page:", path);
     } else if (path.startsWith("/admin/content/products")) {
