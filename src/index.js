@@ -124,19 +124,28 @@ const INJECT_SCRIPT = `
     const field = document.querySelector("[data-field='copy_iframe']");
     if (!field) return;
 
-    const interfaceEl = field.querySelector(".interface");
-    if (!interfaceEl) return;
+    const existing = field.querySelector(".cf-injected-iframe");
+    const newSrc = "https://biggifts-staging.vercel.app/admin/product/" + uuid;
+    if (existing) {
+      if (existing.src === newSrc) return;
+      existing.remove();
+    }
 
-    interfaceEl.innerHTML = "";
-    interfaceEl.style.height = "50dvh";
+    field.style.position = "relative";
+    field.style.minHeight = "80dvh";
 
     const iframe = document.createElement("iframe");
-    iframe.src = "https://biggifts-staging.vercel.app/admin/product/" + uuid;
+    iframe.src = newSrc;
+    iframe.className = "cf-injected-iframe";
+    iframe.style.position = "absolute";
+    iframe.style.inset = "0";
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.style.border = "none";
+    iframe.style.zIndex = "10";
+    iframe.style.background = "white";
 
-    interfaceEl.appendChild(iframe);
+    field.appendChild(iframe);
   }
 
   let lastCategoryPath = null;
