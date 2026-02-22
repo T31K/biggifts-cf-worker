@@ -99,9 +99,12 @@ const INJECT_SCRIPT = `
     }
   });
 
-  // Deduplicate category names in product table rows
+  const PRODUCT_LIST_PATH = /^\/admin\/content\/products\/?$/;
+  const PRODUCT_DETAIL_PATH = /^\/admin\/content\/products\/[^/]+$/;
+
+  // Deduplicate category names in product table rows (list page only)
   function deduplicateCategoryNames() {
-    if (!window.location.pathname.startsWith("/admin/content/products")) return;
+    if (!PRODUCT_LIST_PATH.test(window.location.pathname)) return;
 
     const rows = document.querySelectorAll("tr.table-row");
     rows.forEach((row) => {
@@ -120,37 +123,21 @@ const INJECT_SCRIPT = `
     });
   }
 
-  const categoryObserver = new MutationObserver(() => {
-    if (window.location.pathname.startsWith("/admin/content/products")) {
-      deduplicateCategoryNames();
-    }
-  });
-
-  setTimeout(() => {
-    deduplicateCategoryNames();
-    categoryObserver.observe(document.body, { childList: true, subtree: true });
-  }, 2500);
-
-  // Inject product preview iframe on /admin/content/products/{uuid}
-  const PRODUCT_PATH_RE = /^\/admin\/content\/products\/[^/]+$/;
-
+  // Inject product preview iframe on /admin/content/products/{uuid} (detail page only)
   function injectProductIframe() {
-    if (!PRODUCT_PATH_RE.test(window.location.pathname)) return;
+    if (!PRODUCT_DETAIL_PATH.test(window.location.pathname)) return;
 
-    const buttons = document.querySelectorAll(".presentation-links .button");
-    for (const btn of buttons) {
-      const label = btn.querySelector("span[data-v-a5686923]");
-      if (!label || !label.textContent.includes("Fetch or Copy Product Details")) continue;
+    const anchors = document.querySelectorAll(".presentation-links a");
+    for (const anchor of anchors) {
+      if (!anchor.textContent.includes("Fetch or Copy Product Details")) continue;
 
-      const anchor = btn.closest("a") || btn.querySelector("a") || btn;
-      const href = anchor.getAttribute ? anchor.getAttribute("href") : null;
+      const href = anchor.getAttribute("href");
       if (!href) continue;
 
-      const container = btn.closest(".presentation-links");
+      const container = anchor.closest(".presentation-links");
       if (!container) continue;
       if (container.querySelector(".cf-product-iframe")) continue;
 
-      // Disable the button visually
       container.style.pointerEvents = "none";
       container.style.opacity = "0.5";
 
@@ -164,15 +151,19 @@ const INJECT_SCRIPT = `
     }
   }
 
-  const productObserver = new MutationObserver(() => {
-    if (PRODUCT_PATH_RE.test(window.location.pathname)) {
+  const pageObserver = new MutationObserver(() => {
+    const path = window.location.pathname;
+    if (PRODUCT_LIST_PATH.test(path)) {
+      deduplicateCategoryNames();
+    } else if (PRODUCT_DETAIL_PATH.test(path)) {
       injectProductIframe();
     }
   });
 
   setTimeout(() => {
+    deduplicateCategoryNames();
     injectProductIframe();
-    productObserver.observe(document.body, { childList: true, subtree: true });
+    pageObserver.observe(document.body, { childList: true, subtree: true });
   }, 2500);
 
 })();
