@@ -142,7 +142,7 @@ const INJECT_SCRIPT = `
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.style.border = "none";
-    iframe.style.zIndex = "10";
+    iframe.style.zIndex = "3";
     iframe.style.background = "white";
 
     field.appendChild(iframe);
