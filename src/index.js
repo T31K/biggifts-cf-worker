@@ -130,7 +130,7 @@ const INJECT_SCRIPT = `
     interfaceEl.innerHTML = "";
 
     const iframe = document.createElement("iframe");
-    iframe.src = "/admin/product/" + uuid;
+    iframe.src = "https://biggifts-staging.vercel.app/admin/product/" + uuid;
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.style.border = "none";
