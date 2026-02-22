@@ -99,52 +99,36 @@ const INJECT_SCRIPT = `
     }
   });
 
-  function handleProductsPage() {
-    const path = window.location.pathname;
-    if (!path.startsWith("/admin/content/products")) return;
+  // Deduplicate category names in product table rows
+  function deduplicateCategoryNames() {
+    if (!window.location.pathname.startsWith("/admin/content/products")) return;
 
-    const uuid = path.split("/admin/content/products/")[1];
-
-    if (uuid) {
-      // Detail page - inject iframe
-      const anchors = document.querySelectorAll(".presentation-links a");
-      for (const anchor of anchors) {
-        if (!anchor.textContent.includes("Fetch or Copy Product Details")) continue;
-        const href = anchor.getAttribute("href");
-        if (!href) continue;
-        const container = anchor.closest(".presentation-links");
-        if (!container || container.querySelector(".cf-product-iframe")) continue;
-        container.style.pointerEvents = "none";
-        container.style.opacity = "0.5";
-        const iframe = document.createElement("iframe");
-        iframe.className = "cf-product-iframe";
-        iframe.src = href;
-        iframe.style.cssText = "width:100%;height:800px;border:none;margin-top:16px;border-radius:8px;display:block;";
-        container.insertAdjacentElement("afterend", iframe);
-        break;
+    const rows = document.querySelectorAll("tr.table-row");
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll("td.cell");
+      if (cells.length < 4) return;
+      const categoryCell = cells[3];
+      const valueEl = categoryCell.querySelector(".value");
+      if (!valueEl) return;
+      const text = valueEl.textContent.trim();
+      if (!text || !text.includes(",")) return;
+      const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
+      const unique = [...new Set(parts)];
+      if (unique.length < parts.length) {
+        valueEl.textContent = unique.join(", ");
       }
-    } else {
-      // List page - deduplicate category names
-      const rows = document.querySelectorAll("tr.table-row");
-      rows.forEach((row) => {
-        const cells = row.querySelectorAll("td.cell");
-        if (cells.length < 4) return;
-        const valueEl = cells[3].querySelector(".value");
-        if (!valueEl) return;
-        const text = valueEl.textContent.trim();
-        if (!text || !text.includes(",")) return;
-        const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
-        const unique = [...new Set(parts)];
-        if (unique.length < parts.length) valueEl.textContent = unique.join(", ");
-      });
-    }
+    });
   }
 
-  const pageObserver = new MutationObserver(() => handleProductsPage());
+  const categoryObserver = new MutationObserver(() => {
+    if (window.location.pathname.startsWith("/admin/content/products")) {
+      deduplicateCategoryNames();
+    }
+  });
 
   setTimeout(() => {
-    handleProductsPage();
-    pageObserver.observe(document.body, { childList: true, subtree: true });
+    deduplicateCategoryNames();
+    categoryObserver.observe(document.body, { childList: true, subtree: true });
   }, 2500);
 
 })();
