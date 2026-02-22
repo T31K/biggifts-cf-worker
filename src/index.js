@@ -120,6 +120,24 @@ const INJECT_SCRIPT = `
     });
   }
 
+  function addCopyIframe(uuid) {
+    const field = document.querySelector("[data-field='copy_iframe']");
+    if (!field) return;
+
+    const interfaceEl = field.querySelector(".interface");
+    if (!interfaceEl) return;
+
+    interfaceEl.innerHTML = "";
+
+    const iframe = document.createElement("iframe");
+    iframe.src = "/admin/product/" + uuid;
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+
+    interfaceEl.appendChild(iframe);
+  }
+
   let lastCategoryPath = null;
 
   const categoryObserver = new MutationObserver(() => {
@@ -128,7 +146,8 @@ const INJECT_SCRIPT = `
     lastCategoryPath = path;
 
     if (path.length > "/admin/content/products".length && path.startsWith("/admin/content/products")) {
-      console.log("On product detail page:", path);
+      const uuid = path.split("/admin/content/products/")[1];
+      addCopyIframe(uuid);
     } else if (path.startsWith("/admin/content/products")) {
       deduplicateCategoryNames();
     }
