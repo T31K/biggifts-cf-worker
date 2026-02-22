@@ -99,6 +99,38 @@ const INJECT_SCRIPT = `
     }
   });
 
+  // Deduplicate category names in product table rows
+  function deduplicateCategoryNames() {
+    if (!window.location.pathname.startsWith("/admin/content/products")) return;
+
+    const rows = document.querySelectorAll("tr.table-row");
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll("td.cell");
+      if (cells.length < 4) return;
+      const categoryCell = cells[3];
+      const valueEl = categoryCell.querySelector(".value");
+      if (!valueEl) return;
+      const text = valueEl.textContent.trim();
+      if (!text || !text.includes(",")) return;
+      const parts = text.split(",").map((s) => s.trim()).filter(Boolean);
+      const unique = [...new Set(parts)];
+      if (unique.length < parts.length) {
+        valueEl.textContent = unique.join(", ");
+      }
+    });
+  }
+
+  const categoryObserver = new MutationObserver(() => {
+    if (window.location.pathname.startsWith("/admin/content/products")) {
+      deduplicateCategoryNames();
+    }
+  });
+
+  setTimeout(() => {
+    deduplicateCategoryNames();
+    categoryObserver.observe(document.body, { childList: true, subtree: true });
+  }, 2500);
+
 })();
 `;
 
