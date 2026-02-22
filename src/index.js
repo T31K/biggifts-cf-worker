@@ -54,7 +54,7 @@ const INJECT_SCRIPT = `
   function checkAndApplySettings() {
     const currentPath = window.location.pathname;
 
-    if (currentPath === "/admin/insights") {
+    if (currentPath === "/admin/quotations") {
       hideSidebar();
 
       const mainContent = document.getElementById("main-content");
