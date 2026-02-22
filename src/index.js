@@ -121,7 +121,10 @@ const INJECT_SCRIPT = `
   }
 
   const categoryObserver = new MutationObserver(() => {
-    if (window.location.pathname.startsWith("/admin/content/products")) {
+    const path = window.location.pathname;
+    if (path.length > "/admin/content/products".length && path.startsWith("/admin/content/products")) {
+      console.log("On product detail page:", path);
+    } else if (path.startsWith("/admin/content/products")) {
       deduplicateCategoryNames();
     }
   });
