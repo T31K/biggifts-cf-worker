@@ -102,6 +102,7 @@ const INJECT_SCRIPT = `
 
   // Deduplicate category names in product table rows
   function deduplicateCategoryNames() {
+    console.log("Deduplicating category names...");
     if (!window.location.pathname.startsWith("/admin/content/products")) return;
 
     const rows = document.querySelectorAll("tr.table-row");
