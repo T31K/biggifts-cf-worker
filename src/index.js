@@ -10,9 +10,7 @@ const INJECT_SCRIPT = `
 
     if (!mainContent) return;
 
-    if (!originalMainContent) {
-      originalMainContent = mainContent.innerHTML;
-    }
+    if (!originalMainContent) originalMainContent = mainContent.innerHTML;
 
     if (!cachedIframe) {
       cachedIframe = document.createElement("iframe");
@@ -169,6 +167,7 @@ const INJECT_SCRIPT = `
   });
 
   setTimeout(() => {
+    deduplicateCategoryNames();
     categoryObserver.observe(document.body, { childList: true, subtree: true });
   }, 2500);
 
