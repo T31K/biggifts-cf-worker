@@ -7,7 +7,7 @@ const INJECT_SCRIPT = `
 
   function showIframe(url = "https://biggifts-staging.vercel.app/admin/quotations") {
     const mainContent = document.getElementById("main-content");
-    document.title = "Quotations";
+
     if (!mainContent) return;
 
     if (!originalMainContent) {
@@ -24,6 +24,9 @@ const INJECT_SCRIPT = `
 
     mainContent.innerHTML = "";
     mainContent.appendChild(cachedIframe);
+    setTimeout(() => {
+      document.title = "Quotations";
+    }, 1000);
   }
 
   function hideSidebar() {
