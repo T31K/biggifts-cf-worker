@@ -166,16 +166,11 @@ const INJECT_SCRIPT = `
   });
 
   setTimeout(() => {
-    deduplicateCategoryNames();
     categoryObserver.observe(document.body, { childList: true, subtree: true });
   }, 2500);
 
 })();
 `;
-
-const INJECT_HEADERS = {
-  headers: { "content-type": "application/javascript" },
-};
 
 export default {
   async fetch(request) {
