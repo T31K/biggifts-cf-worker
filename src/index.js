@@ -151,6 +151,7 @@ const INJECT_SCRIPT = `
     field.appendChild(iframe);
   }
 
+
   let lastCategoryPath = null;
 
   const categoryObserver = new MutationObserver(() => {
